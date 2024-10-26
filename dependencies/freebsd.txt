@@ -1,40 +1,53 @@
 gcc
-gobjc++
-gobjc
+# gobjc
+# gobjc++
+libobjc2
 gettext
-systemd-coredump
-libavahi-client-dev
-libavahi-core-dev
-libpocketsphinx3
-libpocketsphinx-dev
-libsphinxbase-dev
+# systemd-coredump
+# libavahi-client-dev
+# libavahi-core-dev
+avahi-libdns
+# libpocketsphinx3
+# libpocketsphinx-dev
+# libsphinxbase-dev
 pocketsphinx
-pocketsphinx-en-us
-libicns-dev
-libwebp-dev
-libxinerama-dev
-libaspell-dev
-libinput-dev
-libudev-dev
-libao-dev
-libsndfile1-dev
-libflite1
-flite1-dev
-libcups2-dev
-libgl1-mesa-dev
-util-linux-locales
-locales-all
+# pocketsphinx-en-us
+# libicns-dev
+# libwebp-dev
+webp
+# libxinerama-dev
+libXinerama
+# libaspell-dev
+aspell
+# libinput-dev
+libinput
+# libudev-dev
+libudev-devd
+# libao-dev
+libao
+# libsndfile1-dev
+libsndfile
+# libflite1
+# flite1-dev
+flite
+# libcups2-dev
+cups
+# libgl1-mesa-dev
+mesa-libs
+# util-linux-locales
+# locales-all
 picom
-info
+# info
 emacs
 fzf
-bc
+# bc
 gdb
 cmake
 autoconf
 libtool
 xinit
-bindfs
+# bindfs
+fusefs-bindfs
 x11-xserver-utils
 libxtst-dev
 gnuplot-x11
