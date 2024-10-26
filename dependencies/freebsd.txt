@@ -1,3 +1,28 @@
+bash
+gmake
+cmake
+libffcall
+libxml2
+libxslt
+openssl
+git
+libiconv
+giflib
+aspell
+cups
+libaudiofile
+portaudio
+libart_lgpl
+windowmaker
+cairo
+libsvgtiny
+harfbuzz-cairo
+libdispatch
+icu
+xorg
+numlockx
+zsh
+# ^^^ from Agora ^^^
 gcc
 # gobjc
 # gobjc++
@@ -48,100 +73,142 @@ libtool
 xinit
 # bindfs
 fusefs-bindfs
-x11-xserver-utils
-libxtst-dev
-gnuplot-x11
+# x11-xserver-utils
+# libxtst-dev
+libXtst
+# gnuplot-x11
+gnuplot
 xdotool
-libffcall-dev
-libxml2-dev
-libxslt-dev
-libpth-dev
+# libffcall-dev
+libffcall
+# libxml2-dev
+libxml2
+# libxslt-dev
+libxslt
+# libpth-dev
+# libpth
+pth
 openssl
-libvncserver-dev
-libtiff-dev
-libjpeg-dev
-libpng-dev
-libgif-dev
+# libvncserver-dev
+libvncserver
+# libtiff-dev
+tiff
+# libjpeg-dev
+jpeg-turbo
+libjpeg-turbo
+# libpng-dev
+png
+# libgif-dev
+giflib
 aspell
-libfreetype6-dev
-libfreetype-dev
-libcups2
-libgnutls28-dev
-libxt-dev
-libcairo2-dev
-libaudiofile-dev
-libblocksruntime-dev
-fonts-freefont-ttf
+# libfreetype6-dev
+# libfreetype-dev
+freetype2
+# libcups2
+cups
+# libgnutls28-dev
+gnutls
+# libxt-dev
+# libcairo2-dev
+# libaudiofile-dev
+libaudiofile
+# libblocksruntime-dev
+# fonts-freefont-ttf
+freefont-ttf
 fontconfig
-libwraster-dev
-libpam0g-dev
-libupower-glib-dev
-libxcursor-dev
-libmagic-dev
-libxrandr-dev
-libbsd-dev
-libudisks2-dev
-libdbus-1-dev
-libdbus-glib-1-dev
-libxkbfile-dev
-libpulse-dev
+# libwraster-dev
+libwraster
+# libpam0g-dev TODO:
+# libupower-glib-dev
+# libxcursor-dev
+# libmagic-dev
+# libxrandr-dev
+libXrandr
+# libbsd-dev
+# libudisks2-dev
+libudisks
+# libdbus-1-dev
+# libdbus-glib-1-dev
+dbus
+# libxkbfile-dev
+libxkbfile
+# libpulse-dev
 pulseaudio
-libxmu-dev
-libxft-dev
-libxpm-dev
-libssl-dev
-libart-2.0-dev
-network-manager
+# libxmu-dev
+libXmu
+# libxft-dev
+libXft
+# libxpm-dev
+libXpm
+# libssl-dev TODO:
+# libart-2.0-dev
+libart_lgpl
+# network-manager TODO:
 texi2html
 texinfo
-texlive
-texlive-latex-extra
-libreadline-dev
-libcairo2-dev
-libglx-dev
-libopengl-dev
-libcups2-dev
-libgif-dev
-libao-dev
-libsndfile1-dev
-libmagickcore-dev
-libcurl4-gnutls-dev
-libicu-dev
-icu-devtools
-sane-utils
+# texlive TODO:
+# texlive-latex-extra
+# libreadline-dev
+readline
+# libcairo2-dev
+# libglx-dev
+glx-utils
+# libopengl-dev
+# libcups2-dev
+# libgif-dev
+# libao-dev
+# libsndfile1-dev
+# libmagickcore-dev
+# libcurl4-gnutls-dev
+# libicu-dev
+# icu-devtools
+# sane-utils
+sane-backends
 scrot
 slop
 rclone
 htop
-vim-nox
+# vim-nox
 curl
 wget
 sudo
 dict
-vlc-bin
-vlc-data
-vlc-plugin-video-output
-vlc-plugin-base
+# vlc-bin
+# vlc-data
+# vlc-plugin-video-output
+# vlc-plugin-base
+vlc
 ffmpeg
-xutils-dev
-xnest
+# xutils-dev TODO:
+# xnest TODO:
 xterm
-libxcb-util0-dev
-libxcb-randr0-dev
+# libxcb-util0-dev
+# libxcb-randr0-dev
+xcb
+libxcb
 discount
-imagemagick
-libsdl2-dev
-libvncserver-dev
-freerdp2-x11
-recollcmd
-libical-dev
-p7zip
-udisks2
-libpcap-dev
+# imagemagick TODO: 
+# libsdl2-dev
+sdl2
+# libvncserver-dev
+libvncserver
+# freerdp2-x11
+xrdp
+# recollcmd
+recoll
+# libical-dev
+ical
+# p7zip TODO:
+# udisks2
+# libpcap-dev
+libpcap
 autorandr
-dict-wn
-dict-jargon
-python3-pyftpdlib
-robin-map-dev
-telnet
+# dict-wn
+# dict-jargon
+dict
+# python3-pyftpdlib
+py311-pyftpdlib
+# robin-map-dev
+robin-map
+# telnet
 chromium
