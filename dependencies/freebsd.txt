@@ -23,6 +23,7 @@ xorg
 numlockx
 zsh
 # ^^^ from Agora ^^^
+autotools
 gcc
 # gobjc
 # gobjc++
@@ -120,6 +121,7 @@ fontconfig
 libwraster
 # libpam0g-dev TODO:
 # libupower-glib-dev
+upower
 # libxcursor-dev
 # libmagic-dev
 # libxrandr-dev
@@ -197,6 +199,7 @@ xrdp
 # recollcmd
 recoll
 # libical-dev
+libical
 ical
 # p7zip TODO:
 # udisks2

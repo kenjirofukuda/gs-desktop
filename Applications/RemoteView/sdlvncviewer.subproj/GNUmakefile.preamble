@@ -15,7 +15,7 @@ ADDITIONAL_CFLAGS +=
 ADDITIONAL_LDFLAGS +=
 
 # Additional include directories the compiler should search
-ADDITIONAL_INCLUDE_DIRS += -I/usr/include/SDL2 
+ADDITIONAL_INCLUDE_DIRS += $(shell pkg-config --cflags-only-I sdl2)
 
 # Additional library directories the linker should search
 ADDITIONAL_LIB_DIRS += 

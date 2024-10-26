@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 rm build_world*.log
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 export PATH=/Library/bin:/System/bin:$PATH
 
