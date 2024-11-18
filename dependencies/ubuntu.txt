@@ -26,11 +26,11 @@ util-linux-locales
 locales-all
 picom
 info
-# emacs
+# emacs  <-- use snap version
 fzf
 bc
 gdb
-cmake
+# cmake <-- use snap version
 autoconf
 libtool
 xinit
