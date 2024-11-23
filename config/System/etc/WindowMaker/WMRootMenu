@@ -74,7 +74,7 @@
   (
     "Show Launcher",
     SHORTCUT,
-    "Control+space",
+    "Super+space",
     EXEC,
     "/Library/Scripts/ShowLauncher"
   ),
