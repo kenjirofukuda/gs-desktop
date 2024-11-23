@@ -4,6 +4,9 @@
   <dir>/System/Fonts</dir>
   <dir>/Library/Fonts</dir>
   <dir>USER_HOME/Library/Fonts</dir>
+  <dir>/usr/share/fonts</dir>
+  <dir>/usr/local/share/fonts</dir>
+  <dir>USER_HOME/.local/share/fonts</dir>
   <match target="font" >
     <edit mode="assign" name="antialias" >
       <bool>ENABLE_ANTIALIAS</bool>
