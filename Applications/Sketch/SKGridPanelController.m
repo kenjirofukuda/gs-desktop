@@ -6,27 +6,32 @@
 
 @implementation SKGridPanelController
 
-+ (id)sharedGridPanelController {
-    static SKGridPanelController *sharedGridPanelController = nil;
++ (id) sharedGridPanelController
+{
+  static SKGridPanelController *sharedGridPanelController = nil;
 
-    if (!sharedGridPanelController) {
-        sharedGridPanelController = [[SKGridPanelController allocWithZone:NULL] init];
+  if (!sharedGridPanelController)
+    {
+      sharedGridPanelController = [[SKGridPanelController allocWithZone: NULL] init];
     }
 
-    return sharedGridPanelController;
+  return sharedGridPanelController;
 }
 
-- (id)init {
-    self = [self initWithWindowNibName:@"GridPanel"];
-    if (self) {
-        [self setWindowFrameAutosaveName:@"GridPanel"];
-	      [self setShouldCascadeWindows:NO];
+- (id) init
+{
+  self = [self initWithWindowNibName: @"GridPanel"];
+  if (self)
+    {
+      [self setWindowFrameAutosaveName: @"GridPanel"];
+      [self setShouldCascadeWindows: NO];
     }
-    return self;
+  return self;
 }
 
-- (void)windowDidLoad {
-    [super windowDidLoad];
+- (void) windowDidLoad
+{
+  [super windowDidLoad];
 }
 
 @end

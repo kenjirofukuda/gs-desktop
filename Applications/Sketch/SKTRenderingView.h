@@ -2,14 +2,14 @@
      File: SKTRenderingView.h
  Abstract: A view to create TIFF and PDF representations of a collection of graphic objects.
   Version: 1.8
- 
+
  Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
  Inc. ("Apple") in consideration of your agreement to the following
  terms, and your use, installation, modification or redistribution of
  this Apple software constitutes acceptance of these terms.  If you do
  not agree with these terms, please do not use, install, modify or
  redistribute this Apple software.
- 
+
  In consideration of your agreement to abide by the following terms, and
  subject to these terms, Apple grants you a personal, non-exclusive
  license, under Apple's copyrights in this original Apple software (the
@@ -25,13 +25,13 @@
  implied, are granted by Apple herein, including but not limited to any
  patent rights that may be infringed by your derivative works or by other
  works in which the Apple Software may be incorporated.
- 
+
  The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
  MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
  THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
  FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
  OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
- 
+
  IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
  OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
@@ -40,29 +40,31 @@
  AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
  STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
- 
+
  Copyright (C) 2012 Apple Inc. All Rights Reserved.
- 
+
  */
 
 #import <Cocoa/Cocoa.h>
 
-@interface SKTRenderingView : NSView {
-    @private
+@interface SKTRenderingView : NSView
+{
+@private
 
-    // The graphics and print job title that were specified at initialization time.
-    NSArray *_graphics;
-    NSString *_printJobTitle;
+  // The graphics and print job title that were specified at initialization time.
+  NSArray *_graphics;
+  NSString *_printJobTitle;
 
 }
 
 // Return the array of graphics as a PDF image.
-+ (NSData *)pdfDataWithGraphics:(NSArray *)graphics;
++ (NSData *) pdfDataWithGraphics: (NSArray *)graphics;
 
 // Return the array of graphics as a TIFF image.
-+ (NSData *)tiffDataWithGraphics:(NSArray *)graphics error:(NSError **)outError;
++ (NSData *) tiffDataWithGraphics: (NSArray *)graphics error: (NSError **)outError;
 
 // This class' designated initializer. printJobTitle must be non-nil if the view is going to be used as the view of an NSPrintOperation.
-- (id)initWithFrame:(NSRect)frame graphics:(NSArray *)graphics printJobTitle:(NSString *)printJobTitle;
+- (id) initWithFrame: (NSRect)frame graphics: (NSArray *)graphics printJobTitle:
+  (NSString *)printJobTitle;
 
 @end

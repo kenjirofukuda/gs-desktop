@@ -32,15 +32,16 @@ const NSInteger SKTGraphicNoHandle = 0;
 static NSString *SKTGraphicClassNameKey = @"className";
 
 // The values that might be returned by -[SKTGraphic creationSizingHandle] and -[SKTGraphic handleUnderPoint:], and that are understood by -[SKTGraphic resizeByMovingHandle:toPoint:]. We provide specific indexes in this enumeration so make sure none of them are zero (that's SKTGraphicNoHandle) and to make sure the flipping arrays in -[SKTGraphic resizeByMovingHandle:toPoint:] work.
-enum {
-    SKTGraphicUpperLeftHandle = 1,
-    SKTGraphicUpperMiddleHandle = 2,
-    SKTGraphicUpperRightHandle = 3,
-    SKTGraphicMiddleLeftHandle = 4,
-    SKTGraphicMiddleRightHandle = 5,
-    SKTGraphicLowerLeftHandle = 6,
-    SKTGraphicLowerMiddleHandle = 7,
-    SKTGraphicLowerRightHandle = 8,
+enum
+{
+  SKTGraphicUpperLeftHandle = 1,
+  SKTGraphicUpperMiddleHandle = 2,
+  SKTGraphicUpperRightHandle = 3,
+  SKTGraphicMiddleLeftHandle = 4,
+  SKTGraphicMiddleRightHandle = 5,
+  SKTGraphicLowerLeftHandle = 6,
+  SKTGraphicLowerMiddleHandle = 7,
+  SKTGraphicLowerRightHandle = 8,
 };
 
 // The handles that graphics draw on themselves are 6 point by 6 point rectangles.
@@ -52,48 +53,52 @@ static CGFloat SKTGraphicHandleHalfWidth = 6.0f / 2.0f;
 
 
 // An override of the superclass' designated initializer.
-- (id)init {
+- (id) init
+{
 
-    // Do the regular Cocoa thing.
-    self = [super init];
-    if (self) {
-	
-	// Set up decent defaults for a new graphic.
-	_bounds = NSZeroRect;
-	_isDrawingFill = NO;
-	_fillColor = [[NSColor whiteColor] retain];
-	_isDrawingStroke = YES;
-	_strokeColor = [[NSColor blackColor] retain];
-	_strokeWidth = 1.0f;
-	
+  // Do the regular Cocoa thing.
+  self = [super init];
+  if (self)
+    {
+
+      // Set up decent defaults for a new graphic.
+      _bounds = NSZeroRect;
+      _isDrawingFill = NO;
+      _fillColor = [[NSColor whiteColor] retain];
+      _isDrawingStroke = YES;
+      _strokeColor = [[NSColor blackColor] retain];
+      _strokeWidth = 1.0f;
+
     }
-    return self;
-    
+  return self;
+
 }
 
 
 // Conformance to the NSCopying protocol. SKTGraphics are copyable for the sake of scriptability.
-- (id)copyWithZone:(NSZone *)zone {
+- (id) copyWithZone: (NSZone *)zone
+{
 
-    // Pretty simple, but there's plenty of opportunity for mistakes. We use [self class] instead of SKTGraphic so that overrides of this method can invoke super. We copy instead of retaining the fill and stroke color even though it probably doesn't make a difference because that's the correct thing to do for attributes (to-one relationships, that's another story). We don't copy _scriptingContainer because the copy doesn't have any scripting container until it's added to one.
-    SKTGraphic *copy = [[[self class] alloc] init];
-    copy->_bounds = _bounds;
-    copy->_isDrawingFill = _isDrawingFill;
-    copy->_fillColor = [_fillColor copy];
-    copy->_isDrawingStroke = _isDrawingStroke;
-    copy->_strokeColor = [_strokeColor copy];
-    copy->_strokeWidth = _strokeWidth;
-    return copy;
+  // Pretty simple, but there's plenty of opportunity for mistakes. We use [self class] instead of SKTGraphic so that overrides of this method can invoke super. We copy instead of retaining the fill and stroke color even though it probably doesn't make a difference because that's the correct thing to do for attributes (to-one relationships, that's another story). We don't copy _scriptingContainer because the copy doesn't have any scripting container until it's added to one.
+  SKTGraphic *copy = [[[self class] alloc] init];
+  copy->_bounds = _bounds;
+  copy->_isDrawingFill = _isDrawingFill;
+  copy->_fillColor = [_fillColor copy];
+  copy->_isDrawingStroke = _isDrawingStroke;
+  copy->_strokeColor = [_strokeColor copy];
+  copy->_strokeWidth = _strokeWidth;
+  return copy;
 
 }
 
 
-- (void)dealloc {
+- (void) dealloc
+{
 
-    // Do the regular Cocoa thing.
-    [_strokeColor release];
-    [_fillColor release];
-    [super dealloc];
+  // Do the regular Cocoa thing.
+  [_strokeColor release];
+  [_fillColor release];
+  [super dealloc];
 
 }
 
@@ -102,112 +107,137 @@ static CGFloat SKTGraphicHandleHalfWidth = 6.0f / 2.0f;
 
 
 // An override of the NSObject(NSKeyValueObservingCustomization) method.
-+ (BOOL)automaticallyNotifiesObserversForKey:(NSString *)key {
++ (BOOL) automaticallyNotifiesObserversForKey: (NSString *)key
+{
 
-    // We don't want KVO autonotification for these properties. Because the setters for all of them invoke -setBounds:, and this class is KVO-compliant for "bounds," and we declared that the values of these properties depend on "bounds," we would up end up with double notifications for them. That would probably be unnoticable, but it's a little wasteful. Something you have to think about with codependent mutable properties like these (regardless of what notification mechanism you're using).
-    BOOL automaticallyNotifies;
-    if ([[NSSet setWithObjects:SKTGraphicXPositionKey, SKTGraphicYPositionKey, SKTGraphicWidthKey, SKTGraphicHeightKey, nil] containsObject:key]) {
-	automaticallyNotifies = NO;
-    } else {
-	automaticallyNotifies = [super automaticallyNotifiesObserversForKey:key];
+  // We don't want KVO autonotification for these properties. Because the setters for all of them invoke -setBounds:, and this class is KVO-compliant for "bounds," and we declared that the values of these properties depend on "bounds," we would up end up with double notifications for them. That would probably be unnoticable, but it's a little wasteful. Something you have to think about with codependent mutable properties like these (regardless of what notification mechanism you're using).
+  BOOL automaticallyNotifies;
+  if ([[NSSet setWithObjects: SKTGraphicXPositionKey, SKTGraphicYPositionKey, SKTGraphicWidthKey,
+        SKTGraphicHeightKey, nil] containsObject: key])
+    {
+      automaticallyNotifies = NO;
     }
-    return automaticallyNotifies;
+  else
+    {
+      automaticallyNotifies = [super automaticallyNotifiesObserversForKey: key];
+    }
+  return automaticallyNotifies;
 
 }
 
 
 // In Mac OS 10.5 and newer KVO's dependency mechanism invokes class methods to find out what properties affect properties being observed, like these.
-+ (NSSet *)keyPathsForValuesAffectingXPosition {
-    return [NSSet setWithObject:SKTGraphicBoundsKey];
++ (NSSet *) keyPathsForValuesAffectingXPosition
+{
+  return [NSSet setWithObject: SKTGraphicBoundsKey];
 }
-+ (NSSet *)keyPathsForValuesAffectingYPosition {
-    return [NSSet setWithObject:SKTGraphicBoundsKey];
++ (NSSet *) keyPathsForValuesAffectingYPosition
+{
+  return [NSSet setWithObject: SKTGraphicBoundsKey];
 }
-+ (NSSet *)keyPathsForValuesAffectingWidth {
-    return [NSSet setWithObject:SKTGraphicBoundsKey];
++ (NSSet *) keyPathsForValuesAffectingWidth
+{
+  return [NSSet setWithObject: SKTGraphicBoundsKey];
 }
-+ (NSSet *)keyPathsForValuesAffectingHeight {
-    return [NSSet setWithObject:SKTGraphicBoundsKey];
++ (NSSet *) keyPathsForValuesAffectingHeight
+{
+  return [NSSet setWithObject: SKTGraphicBoundsKey];
 }
-- (CGFloat)xPosition {
-    return [self bounds].origin.x;
+- (CGFloat) xPosition
+{
+  return [self bounds].origin.x;
 }
-- (CGFloat)yPosition {
-    return [self bounds].origin.y;
+- (CGFloat) yPosition
+{
+  return [self bounds].origin.y;
 }
-- (CGFloat)width {
-    return [self bounds].size.width;
+- (CGFloat) width
+{
+  return [self bounds].size.width;
 }
-- (CGFloat)height {
-    return [self bounds].size.height;
+- (CGFloat) height
+{
+  return [self bounds].size.height;
 }
-- (void)setXPosition:(CGFloat)xPosition {
-    NSRect bounds = [self bounds];
-    bounds.origin.x = xPosition;
-    [self setBounds:bounds];
+- (void) setXPosition: (CGFloat)xPosition
+{
+  NSRect bounds = [self bounds];
+  bounds.origin.x = xPosition;
+  [self setBounds: bounds];
 }
-- (void)setYPosition:(CGFloat)yPosition {
-    NSRect bounds = [self bounds];
-    bounds.origin.y = yPosition;
-    [self setBounds:bounds];
+- (void) setYPosition: (CGFloat)yPosition
+{
+  NSRect bounds = [self bounds];
+  bounds.origin.y = yPosition;
+  [self setBounds: bounds];
 }
-- (void)setWidth:(CGFloat)width {
-    NSRect bounds = [self bounds];
-    bounds.size.width = width;
-    [self setBounds:bounds];
+- (void) setWidth: (CGFloat)width
+{
+  NSRect bounds = [self bounds];
+  bounds.size.width = width;
+  [self setBounds: bounds];
 }
-- (void)setHeight:(CGFloat)height {
-    NSRect bounds = [self bounds];
-    bounds.size.height = height;
-    [self setBounds:bounds];
+- (void) setHeight: (CGFloat)height
+{
+  NSRect bounds = [self bounds];
+  bounds.size.height = height;
+  [self setBounds: bounds];
 }
 
 
 #pragma mark *** Convenience ***
 
 
-+ (NSRect)boundsOfGraphics:(NSArray *)graphics {
++ (NSRect) boundsOfGraphics: (NSArray *)graphics
+{
 
-    // The bounds of an array of graphics is the union of all of their bounds.
-    NSRect bounds = NSZeroRect;
-    NSUInteger graphicCount = [graphics count];
-    if (graphicCount>0) {
-	bounds = [[graphics objectAtIndex:0] bounds];
-        NSUInteger index;
-	for (index = 1; index<graphicCount; index++) {
-            bounds = NSUnionRect(bounds, [[graphics objectAtIndex:index] bounds]);
-	}
+  // The bounds of an array of graphics is the union of all of their bounds.
+  NSRect bounds = NSZeroRect;
+  NSUInteger graphicCount = [graphics count];
+  if (graphicCount > 0)
+    {
+      bounds = [[graphics objectAtIndex: 0] bounds];
+      NSUInteger index;
+      for (index = 1; index < graphicCount; index++)
+        {
+          bounds = NSUnionRect(bounds, [[graphics objectAtIndex: index] bounds]);
+        }
     }
-    return bounds;
+  return bounds;
 
 }
 
 
-+ (NSRect)drawingBoundsOfGraphics:(NSArray *)graphics {
++ (NSRect) drawingBoundsOfGraphics: (NSArray *)graphics
+{
 
-    // The drawing bounds of an array of graphics is the union of all of their drawing bounds.
-    NSRect drawingBounds = NSZeroRect;
-    NSUInteger graphicCount = [graphics count];
-    if (graphicCount>0) {
-	drawingBounds = [[graphics objectAtIndex:0] drawingBounds];
-        NSUInteger index;
-	for (index = 1; index<graphicCount; index++) {
-            drawingBounds = NSUnionRect(drawingBounds, [[graphics objectAtIndex:index] drawingBounds]);
-	}
+  // The drawing bounds of an array of graphics is the union of all of their drawing bounds.
+  NSRect drawingBounds = NSZeroRect;
+  NSUInteger graphicCount = [graphics count];
+  if (graphicCount > 0)
+    {
+      drawingBounds = [[graphics objectAtIndex: 0] drawingBounds];
+      NSUInteger index;
+      for (index = 1; index < graphicCount; index++)
+        {
+          drawingBounds = NSUnionRect(drawingBounds, [[graphics objectAtIndex: index] drawingBounds]);
+        }
     }
-    return drawingBounds;
+  return drawingBounds;
 
 }
 
 
-+ (void)translateGraphics:(NSArray *)graphics byX:(CGFloat)deltaX y:(CGFloat)deltaY {
++ (void) translateGraphics: (NSArray *)graphics byX: (CGFloat)deltaX y: (CGFloat)deltaY
+{
 
-    // Pretty simple.
-    NSUInteger graphicCount = [graphics count];
-    NSUInteger index;
-    for (index = 0; index<graphicCount; index++) {
-	SKTGraphic *graphic = [graphics objectAtIndex:index];
-	[graphic setBounds:NSOffsetRect([graphic bounds], deltaX, deltaY)];
+  // Pretty simple.
+  NSUInteger graphicCount = [graphics count];
+  NSUInteger index;
+  for (index = 0; index < graphicCount; index++)
+    {
+      SKTGraphic *graphic = [graphics objectAtIndex: index];
+      [graphic setBounds: NSOffsetRect([graphic bounds], deltaX, deltaY)];
     }
 
 }
@@ -216,152 +246,184 @@ static CGFloat SKTGraphicHandleHalfWidth = 6.0f / 2.0f;
 #pragma mark *** Persistence ***
 
 
-+ (NSArray *)graphicsWithPasteboardData:(NSData *)data error:(NSError **)outError {
++ (NSArray *) graphicsWithPasteboardData: (NSData *)data error: (NSError **)outError
+{
 
-    // Because this data may have come from outside this process, don't assume that any property list object we get back is the right type.
-    NSArray *graphics = nil;
-    NSArray *propertiesArray = [NSPropertyListSerialization propertyListFromData:data mutabilityOption:NSPropertyListImmutable format:NULL errorDescription:NULL];
-    if (![propertiesArray isKindOfClass:[NSArray class]]) {
-	propertiesArray = nil;
+  // Because this data may have come from outside this process, don't assume that any property list object we get back is the right type.
+  NSArray *graphics = nil;
+  NSArray *propertiesArray = [NSPropertyListSerialization propertyListFromData: data mutabilityOption:
+                                                          NSPropertyListImmutable format: NULL errorDescription: NULL];
+  if (![propertiesArray isKindOfClass: [NSArray class]])
+    {
+      propertiesArray = nil;
     }
-    if (propertiesArray) {
+  if (propertiesArray)
+    {
 
-	// Convert the array of graphic property dictionaries into an array of graphics.
-	graphics = [self graphicsWithProperties:propertiesArray];
-
-    } else if (outError) {
-
-	// If property list parsing fails we have no choice but to admit that we don't know what went wrong. The error description returned by +[NSPropertyListSerialization propertyListFromData:mutabilityOption:format:errorDescription:] would be pretty technical, and not the sort of thing that we should show to a user.
-	*outError = SKTErrorWithCode(SKTUnknownPasteboardReadError);
+      // Convert the array of graphic property dictionaries into an array of graphics.
+      graphics = [self graphicsWithProperties: propertiesArray];
 
     }
-    return graphics;
+  else if (outError)
+    {
+
+      // If property list parsing fails we have no choice but to admit that we don't know what went wrong. The error description returned by +[NSPropertyListSerialization propertyListFromData:mutabilityOption:format:errorDescription:] would be pretty technical, and not the sort of thing that we should show to a user.
+      *outError = SKTErrorWithCode(SKTUnknownPasteboardReadError);
+
+    }
+  return graphics;
 
 }
 
 
-+ (NSArray *)graphicsWithProperties:(NSArray *)propertiesArray {
++ (NSArray *) graphicsWithProperties: (NSArray *)propertiesArray
+{
 
-    // Convert the array of graphic property dictionaries into an array of graphics. Again, don't assume that property list objects are the right type.
-    NSUInteger graphicCount = [propertiesArray count];
-    NSMutableArray *graphics = [[NSMutableArray alloc] initWithCapacity:graphicCount];
-    NSUInteger index;
-    for (index = 0; index<graphicCount; index++) {
-	NSDictionary *properties = [propertiesArray objectAtIndex:index];
-	if ([properties isKindOfClass:[NSDictionary class]]) {
+  // Convert the array of graphic property dictionaries into an array of graphics. Again, don't assume that property list objects are the right type.
+  NSUInteger graphicCount = [propertiesArray count];
+  NSMutableArray *graphics = [[NSMutableArray alloc] initWithCapacity: graphicCount];
+  NSUInteger index;
+  for (index = 0; index < graphicCount; index++)
+    {
+      NSDictionary *properties = [propertiesArray objectAtIndex: index];
+      if ([properties isKindOfClass: [NSDictionary class]])
+        {
 
-	    // Figure out the class of graphic to instantiate. The value of the SKTGraphicClassNameKey entry must be an Objective-C class name. Don't trust the type of something you get out of a property list unless you know your process created it or it was read from your application or framework's resources.
-	    NSString *className = [properties objectForKey:SKTGraphicClassNameKey];
-	    if ([className isKindOfClass:[NSString class]]) {
-		Class class = NSClassFromString(className);
-		if (class) {
+          // Figure out the class of graphic to instantiate. The value of the SKTGraphicClassNameKey entry must be an Objective-C class name. Don't trust the type of something you get out of a property list unless you know your process created it or it was read from your application or framework's resources.
+          NSString *className = [properties objectForKey: SKTGraphicClassNameKey];
+          if ([className isKindOfClass: [NSString class]])
+            {
+              Class class = NSClassFromString(className);
+              if (class)
+                {
 
-		    // Create a new graphic. If it doesn't work then just do nothing. We could return an NSError, but doing things this way 1) means that a user might be able to rescue graphics from a partially corrupted document, and 2) is easier.
-		    SKTGraphic *graphic = [[class alloc] initWithProperties:properties];
-		    if (graphic) {
-			[graphics addObject:graphic];
-			[graphic release];
-		    }
+                  // Create a new graphic. If it doesn't work then just do nothing. We could return an NSError, but doing things this way 1) means that a user might be able to rescue graphics from a partially corrupted document, and 2) is easier.
+                  SKTGraphic *graphic = [[class alloc] initWithProperties: properties];
+                  if (graphic)
+                    {
+                      [graphics addObject: graphic];
+                      [graphic release];
+                    }
 
-		}
+                }
 
-	    }
+            }
 
-	}
+        }
     }
-    return [graphics autorelease];
+  return [graphics autorelease];
 
 }
 
 
-+ (NSData *)pasteboardDataWithGraphics:(NSArray *)graphics {
++ (NSData *) pasteboardDataWithGraphics: (NSArray *)graphics
+{
 
-    // Convert the contents of the document to a property list and then flatten the property list.
-    return [NSPropertyListSerialization dataFromPropertyList:[self propertiesWithGraphics:graphics] format:NSPropertyListBinaryFormat_v1_0 errorDescription:NULL];
-
-}
-
-
-+ (NSArray *)propertiesWithGraphics:(NSArray *)graphics {
-
-    // Convert the array of graphics dictionaries into an array of graphic property dictionaries.
-    NSUInteger graphicCount = [graphics count];
-    NSMutableArray *propertiesArray = [[NSMutableArray alloc] initWithCapacity:graphicCount];
-    NSUInteger index;
-    for (index = 0; index<graphicCount; index++) {
-	SKTGraphic *graphic = [graphics objectAtIndex:index];
-
-	// Get the properties of the graphic, add the class name that can be used by +graphicsWithProperties: to it, and add the properties to the array we're building.
-	NSMutableDictionary *properties = [graphic properties];
-	[properties setObject:NSStringFromClass([graphic class]) forKey:SKTGraphicClassNameKey];
-	[propertiesArray addObject:properties];
-
-    }
-    return [propertiesArray autorelease];
+  // Convert the contents of the document to a property list and then flatten the property list.
+  return [NSPropertyListSerialization dataFromPropertyList: [self propertiesWithGraphics: graphics]
+                                      format: NSPropertyListBinaryFormat_v1_0 errorDescription: NULL];
 
 }
 
 
-- (id)initWithProperties:(NSDictionary *)properties {
++ (NSArray *) propertiesWithGraphics: (NSArray *)graphics
+{
 
-    // Invoke the designated initializer.
-    self = [self init];
-    if (self) {
+  // Convert the array of graphics dictionaries into an array of graphic property dictionaries.
+  NSUInteger graphicCount = [graphics count];
+  NSMutableArray *propertiesArray = [[NSMutableArray alloc] initWithCapacity: graphicCount];
+  NSUInteger index;
+  for (index = 0; index < graphicCount; index++)
+    {
+      SKTGraphic *graphic = [graphics objectAtIndex: index];
 
-	// The dictionary entries are all instances of the classes that can be written in property lists. Don't trust the type of something you get out of a property list unless you know your process created it or it was read from your application or framework's resources. We don't have to worry about KVO-compliance in initializers like this by the way; no one should be observing an unitialized object.
-	Class dataClass = [NSData class];
-	Class numberClass = [NSNumber class];
-	Class stringClass = [NSString class];
-	NSString *boundsString = [properties objectForKey:SKTGraphicBoundsKey];
-	if ([boundsString isKindOfClass:stringClass]) {
-	    _bounds = NSRectFromString(boundsString);
-	}
-	NSNumber *isDrawingFillNumber = [properties objectForKey:SKTGraphicIsDrawingFillKey];
-	if ([isDrawingFillNumber isKindOfClass:numberClass]) {
-	    _isDrawingFill = [isDrawingFillNumber boolValue];
-	}
-	NSData *fillColorData = [properties objectForKey:SKTGraphicFillColorKey];
-	if ([fillColorData isKindOfClass:dataClass]) {
-	    [_fillColor release];
-	    _fillColor = [[NSUnarchiver unarchiveObjectWithData:fillColorData] retain];
-	}
-	NSNumber *isDrawingStrokeNumber = [properties objectForKey:SKTGraphicIsDrawingStrokeKey];
-	if ([isDrawingStrokeNumber isKindOfClass:numberClass]) {
-	    _isDrawingStroke = [isDrawingStrokeNumber boolValue];
-	}
-	NSData *strokeColorData = [properties objectForKey:SKTGraphicStrokeColorKey];
-	if ([strokeColorData isKindOfClass:dataClass]) {
-	    [_strokeColor release];
-	    _strokeColor = [[NSUnarchiver unarchiveObjectWithData:strokeColorData] retain];
-	}
-	NSNumber *strokeWidthNumber = [properties objectForKey:SKTGraphicStrokeWidthKey];
-	if ([strokeWidthNumber isKindOfClass:numberClass]) {
-	    _strokeWidth = [strokeWidthNumber doubleValue];
-	}
+      // Get the properties of the graphic, add the class name that can be used by +graphicsWithProperties: to it, and add the properties to the array we're building.
+      NSMutableDictionary *properties = [graphic properties];
+      [properties setObject: NSStringFromClass([graphic class]) forKey: SKTGraphicClassNameKey];
+      [propertiesArray addObject: properties];
 
     }
-    return self;
+  return [propertiesArray autorelease];
 
 }
 
 
-- (NSMutableDictionary *)properties {
+- (id) initWithProperties: (NSDictionary *)properties
+{
 
-    // Return a dictionary that contains nothing but values that can be written in property lists.
-    NSMutableDictionary *properties = [NSMutableDictionary dictionary];
-    [properties setObject:NSStringFromRect([self bounds]) forKey:SKTGraphicBoundsKey];
-    [properties setObject:[NSNumber numberWithBool:[self isDrawingFill]] forKey:SKTGraphicIsDrawingFillKey];
-    NSColor *fillColor = [self fillColor];
-    if (fillColor) {
-        [properties setObject:[NSArchiver archivedDataWithRootObject:fillColor] forKey:SKTGraphicFillColorKey];
+  // Invoke the designated initializer.
+  self = [self init];
+  if (self)
+    {
+
+      // The dictionary entries are all instances of the classes that can be written in property lists. Don't trust the type of something you get out of a property list unless you know your process created it or it was read from your application or framework's resources. We don't have to worry about KVO-compliance in initializers like this by the way; no one should be observing an unitialized object.
+      Class dataClass = [NSData class];
+      Class numberClass = [NSNumber class];
+      Class stringClass = [NSString class];
+      NSString *boundsString = [properties objectForKey: SKTGraphicBoundsKey];
+      if ([boundsString isKindOfClass: stringClass])
+        {
+          _bounds = NSRectFromString(boundsString);
+        }
+      NSNumber *isDrawingFillNumber = [properties objectForKey: SKTGraphicIsDrawingFillKey];
+      if ([isDrawingFillNumber isKindOfClass: numberClass])
+        {
+          _isDrawingFill = [isDrawingFillNumber boolValue];
+        }
+      NSData *fillColorData = [properties objectForKey: SKTGraphicFillColorKey];
+      if ([fillColorData isKindOfClass: dataClass])
+        {
+          [_fillColor release];
+          _fillColor = [[NSUnarchiver unarchiveObjectWithData: fillColorData] retain];
+        }
+      NSNumber *isDrawingStrokeNumber = [properties objectForKey: SKTGraphicIsDrawingStrokeKey];
+      if ([isDrawingStrokeNumber isKindOfClass: numberClass])
+        {
+          _isDrawingStroke = [isDrawingStrokeNumber boolValue];
+        }
+      NSData *strokeColorData = [properties objectForKey: SKTGraphicStrokeColorKey];
+      if ([strokeColorData isKindOfClass: dataClass])
+        {
+          [_strokeColor release];
+          _strokeColor = [[NSUnarchiver unarchiveObjectWithData: strokeColorData] retain];
+        }
+      NSNumber *strokeWidthNumber = [properties objectForKey: SKTGraphicStrokeWidthKey];
+      if ([strokeWidthNumber isKindOfClass: numberClass])
+        {
+          _strokeWidth = [strokeWidthNumber doubleValue];
+        }
+
     }
-    [properties setObject:[NSNumber numberWithBool:[self isDrawingStroke]] forKey:SKTGraphicIsDrawingStrokeKey];
-    NSColor *strokeColor = [self strokeColor];
-    if (strokeColor) {
-        [properties setObject:[NSArchiver archivedDataWithRootObject:strokeColor] forKey:SKTGraphicStrokeColorKey];
+  return self;
+
+}
+
+
+- (NSMutableDictionary *) properties
+{
+
+  // Return a dictionary that contains nothing but values that can be written in property lists.
+  NSMutableDictionary *properties = [NSMutableDictionary dictionary];
+  [properties setObject: NSStringFromRect([self bounds]) forKey: SKTGraphicBoundsKey];
+  [properties setObject: [NSNumber numberWithBool: [self isDrawingFill]] forKey:
+              SKTGraphicIsDrawingFillKey];
+  NSColor *fillColor = [self fillColor];
+  if (fillColor)
+    {
+      [properties setObject: [NSArchiver archivedDataWithRootObject: fillColor] forKey:
+                  SKTGraphicFillColorKey];
     }
-    [properties setObject:[NSNumber numberWithDouble:[self strokeWidth]] forKey:SKTGraphicStrokeWidthKey];
-    return properties;
+  [properties setObject: [NSNumber numberWithBool: [self isDrawingStroke]] forKey:
+              SKTGraphicIsDrawingStrokeKey];
+  NSColor *strokeColor = [self strokeColor];
+  if (strokeColor)
+    {
+      [properties setObject: [NSArchiver archivedDataWithRootObject: strokeColor] forKey:
+                  SKTGraphicStrokeColorKey];
+    }
+  [properties setObject: [NSNumber numberWithDouble: [self strokeWidth]] forKey:
+              SKTGraphicStrokeWidthKey];
+  return properties;
 
 }
 
@@ -370,126 +432,146 @@ static CGFloat SKTGraphicHandleHalfWidth = 6.0f / 2.0f;
 
 
 // Do the regular Cocoa thing.
-- (NSRect)bounds {
-    return _bounds;
+- (NSRect) bounds
+{
+  return _bounds;
 }
-- (BOOL)isDrawingFill {
-    return _isDrawingFill;
+- (BOOL) isDrawingFill
+{
+  return _isDrawingFill;
 }
-- (NSColor *)fillColor {
-    return [[_fillColor retain] autorelease];
+- (NSColor *) fillColor
+{
+  return [[_fillColor retain] autorelease];
 }
-- (BOOL)isDrawingStroke {
-    return _isDrawingStroke;
+- (BOOL) isDrawingStroke
+{
+  return _isDrawingStroke;
 }
-- (NSColor *)strokeColor {
-    return [[_strokeColor retain] autorelease];
+- (NSColor *) strokeColor
+{
+  return [[_strokeColor retain] autorelease];
 }
-- (CGFloat)strokeWidth {
-    return _strokeWidth;
+- (CGFloat) strokeWidth
+{
+  return _strokeWidth;
 }
 
 
 #pragma mark *** Drawing ***
 
 
-+ (NSSet *)keyPathsForValuesAffectingDrawingBounds {
-    
-    // The only properties managed by SKTGraphic that affect the drawing bounds are the bounds and the the stroke width.
-    return [NSSet setWithObjects:SKTGraphicBoundsKey, SKTGraphicStrokeWidthKey, nil];
++ (NSSet *) keyPathsForValuesAffectingDrawingBounds
+{
+
+  // The only properties managed by SKTGraphic that affect the drawing bounds are the bounds and the the stroke width.
+  return [NSSet setWithObjects: SKTGraphicBoundsKey, SKTGraphicStrokeWidthKey, nil];
 
 }
 
 
-+ (NSSet *)keyPathsForValuesAffectingDrawingContents {
-    
-    // The only properties managed by SKTGraphic that affect drawing but not the drawing bounds are the fill and stroke parameters.
-    return [NSSet setWithObjects:SKTGraphicIsDrawingFillKey, SKTGraphicFillColorKey, SKTGraphicIsDrawingStrokeKey, SKTGraphicStrokeColorKey, nil];
-    
++ (NSSet *) keyPathsForValuesAffectingDrawingContents
+{
+
+  // The only properties managed by SKTGraphic that affect drawing but not the drawing bounds are the fill and stroke parameters.
+  return [NSSet setWithObjects: SKTGraphicIsDrawingFillKey, SKTGraphicFillColorKey,
+                SKTGraphicIsDrawingStrokeKey, SKTGraphicStrokeColorKey, nil];
+
 }
 
 
-- (NSRect)drawingBounds {
+- (NSRect) drawingBounds
+{
 
-    // Assume that -[SKTGraphic drawContentsInView:] and -[SKTGraphic drawHandlesInView:] will be doing the drawing. Start with the plain bounds of the graphic, then take drawing of handles at the corners of the bounds into account, then optional stroke drawing.
-    CGFloat outset = SKTGraphicHandleHalfWidth;
-    if ([self isDrawingStroke]) {
-	CGFloat strokeOutset = [self strokeWidth] / 2.0f;
-	if (strokeOutset>outset) {
-	    outset = strokeOutset;
-	}
+  // Assume that -[SKTGraphic drawContentsInView:] and -[SKTGraphic drawHandlesInView:] will be doing the drawing. Start with the plain bounds of the graphic, then take drawing of handles at the corners of the bounds into account, then optional stroke drawing.
+  CGFloat outset = SKTGraphicHandleHalfWidth;
+  if ([self isDrawingStroke])
+    {
+      CGFloat strokeOutset = [self strokeWidth] / 2.0f;
+      if (strokeOutset > outset)
+        {
+          outset = strokeOutset;
+        }
     }
-    CGFloat inset = 0.0f - outset;
-    NSRect drawingBounds = NSInsetRect([self bounds], inset, inset);
-    
-    // -drawHandleInView:atPoint: draws a one-unit drop shadow too.
-    drawingBounds.size.width += 1.0f;
-    drawingBounds.size.height += 1.0f;
-    return drawingBounds;
+  CGFloat inset = 0.0f - outset;
+  NSRect drawingBounds = NSInsetRect([self bounds], inset, inset);
+
+  // -drawHandleInView:atPoint: draws a one-unit drop shadow too.
+  drawingBounds.size.width += 1.0f;
+  drawingBounds.size.height += 1.0f;
+  return drawingBounds;
 
 }
 
 
-- (void)drawContentsInView:(NSView *)view isBeingCreateOrEdited:(BOOL)isBeingCreatedOrEditing {
+- (void) drawContentsInView: (NSView *)view isBeingCreateOrEdited: (BOOL)isBeingCreatedOrEditing
+{
 
-    // If the graphic is so so simple that it can be boiled down to a bezier path then just draw a bezier path. It's -bezierPathForDrawing's responsibility to return a path with the current stroke width.
-    NSBezierPath *path = [self bezierPathForDrawing];
-    if (path) {
-	if ([self isDrawingFill]) {
-	    [[self fillColor] set];
-	    [path fill];
-	}
-	if ([self isDrawingStroke]) {
-	    [[self strokeColor] set];
-	    [path stroke];
-	}
+  // If the graphic is so so simple that it can be boiled down to a bezier path then just draw a bezier path. It's -bezierPathForDrawing's responsibility to return a path with the current stroke width.
+  NSBezierPath *path = [self bezierPathForDrawing];
+  if (path)
+    {
+      if ([self isDrawingFill])
+        {
+          [[self fillColor] set];
+          [path fill];
+        }
+      if ([self isDrawingStroke])
+        {
+          [[self strokeColor] set];
+          [path stroke];
+        }
     }
 
 }
 
-- (NSBezierPath *)bezierPathForDrawing {
-    
-    // Live to be overriden.
-    [NSException raise:NSInternalInconsistencyException format:@"Neither -drawContentsInView: nor -bezierPathForDrawing has been overridden."];
-    return nil;
-    
-}
+- (NSBezierPath *) bezierPathForDrawing
+{
 
-
-- (void)drawHandlesInView:(NSView *)view {
-
-    // Draw handles at the corners and on the sides.
-    NSRect bounds = [self bounds];
-    [self drawHandleInView:view atPoint:NSMakePoint(NSMinX(bounds), NSMinY(bounds))];
-    [self drawHandleInView:view atPoint:NSMakePoint(NSMidX(bounds), NSMinY(bounds))];
-    [self drawHandleInView:view atPoint:NSMakePoint(NSMaxX(bounds), NSMinY(bounds))];
-    [self drawHandleInView:view atPoint:NSMakePoint(NSMinX(bounds), NSMidY(bounds))];
-    [self drawHandleInView:view atPoint:NSMakePoint(NSMaxX(bounds), NSMidY(bounds))];
-    [self drawHandleInView:view atPoint:NSMakePoint(NSMinX(bounds), NSMaxY(bounds))];
-    [self drawHandleInView:view atPoint:NSMakePoint(NSMidX(bounds), NSMaxY(bounds))];
-    [self drawHandleInView:view atPoint:NSMakePoint(NSMaxX(bounds), NSMaxY(bounds))];
+  // Live to be overriden.
+  [NSException raise: NSInternalInconsistencyException format:
+               @"Neither -drawContentsInView: nor -bezierPathForDrawing has been overridden."];
+  return nil;
 
 }
 
 
-- (void)drawHandleInView:(NSView *)view atPoint:(NSPoint)point {
+- (void) drawHandlesInView: (NSView *)view
+{
 
-    // Figure out a rectangle that's centered on the point but lined up with device pixels.
-    NSRect handleBounds;
-    handleBounds.origin.x = point.x - SKTGraphicHandleHalfWidth;
-    handleBounds.origin.y = point.y - SKTGraphicHandleHalfWidth;
-    handleBounds.size.width = SKTGraphicHandleWidth;
-    handleBounds.size.height = SKTGraphicHandleWidth;
-    handleBounds = [view centerScanRect:handleBounds];
-    
-    // Draw the shadow of the handle.
-    NSRect handleShadowBounds = NSOffsetRect(handleBounds, 1.0f, 1.0f);
-    [[NSColor controlDarkShadowColor] set];
-    NSRectFill(handleShadowBounds);
+  // Draw handles at the corners and on the sides.
+  NSRect bounds = [self bounds];
+  [self drawHandleInView: view atPoint: NSMakePoint(NSMinX(bounds), NSMinY(bounds))];
+  [self drawHandleInView: view atPoint: NSMakePoint(NSMidX(bounds), NSMinY(bounds))];
+  [self drawHandleInView: view atPoint: NSMakePoint(NSMaxX(bounds), NSMinY(bounds))];
+  [self drawHandleInView: view atPoint: NSMakePoint(NSMinX(bounds), NSMidY(bounds))];
+  [self drawHandleInView: view atPoint: NSMakePoint(NSMaxX(bounds), NSMidY(bounds))];
+  [self drawHandleInView: view atPoint: NSMakePoint(NSMinX(bounds), NSMaxY(bounds))];
+  [self drawHandleInView: view atPoint: NSMakePoint(NSMidX(bounds), NSMaxY(bounds))];
+  [self drawHandleInView: view atPoint: NSMakePoint(NSMaxX(bounds), NSMaxY(bounds))];
 
-    // Draw the handle itself.
-    [[NSColor knobColor] set];
-    NSRectFill(handleBounds);
+}
+
+
+- (void) drawHandleInView: (NSView *)view atPoint: (NSPoint)point
+{
+
+  // Figure out a rectangle that's centered on the point but lined up with device pixels.
+  NSRect handleBounds;
+  handleBounds.origin.x = point.x - SKTGraphicHandleHalfWidth;
+  handleBounds.origin.y = point.y - SKTGraphicHandleHalfWidth;
+  handleBounds.size.width = SKTGraphicHandleWidth;
+  handleBounds.size.height = SKTGraphicHandleWidth;
+  handleBounds = [view centerScanRect: handleBounds];
+
+  // Draw the shadow of the handle.
+  NSRect handleShadowBounds = NSOffsetRect(handleBounds, 1.0f, 1.0f);
+  [[NSColor controlDarkShadowColor] set];
+  NSRectFill(handleShadowBounds);
+
+  // Draw the handle itself.
+  [[NSColor knobColor] set];
+  NSRectFill(handleBounds);
 
 }
 
@@ -497,287 +579,351 @@ static CGFloat SKTGraphicHandleHalfWidth = 6.0f / 2.0f;
 #pragma mark *** Editing ***
 
 
-+ (NSCursor *)creationCursor {
++ (NSCursor *) creationCursor
+{
 
-    // By default we use the crosshairs cursor.
-    static NSCursor *crosshairsCursor = nil;
-    if (!crosshairsCursor) {
-        NSImage *crosshairsImage = [NSImage imageNamed:@"Cross"];
-        NSSize crosshairsImageSize = [crosshairsImage size];
-        crosshairsCursor = [[NSCursor alloc] initWithImage:crosshairsImage hotSpot:NSMakePoint((crosshairsImageSize.width / 2.0), (crosshairsImageSize.height / 2.0))];
+  // By default we use the crosshairs cursor.
+  static NSCursor *crosshairsCursor = nil;
+  if (!crosshairsCursor)
+    {
+      NSImage *crosshairsImage = [NSImage imageNamed: @"Cross"];
+      NSSize crosshairsImageSize = [crosshairsImage size];
+      crosshairsCursor = [[NSCursor alloc] initWithImage: crosshairsImage hotSpot: NSMakePoint((
+                                                                                                 crosshairsImageSize.width / 2.0), (crosshairsImageSize.height / 2.0))];
     }
-    return crosshairsCursor;
+  return crosshairsCursor;
 
 }
 
 
-+ (NSInteger)creationSizingHandle {
++ (NSInteger) creationSizingHandle
+{
 
-    // Return the number of the handle for the lower-right corner. If the user drags it so that it's no longer in the lower-right, -resizeByMovingHandle:toPoint: will deal with it.
-    return SKTGraphicLowerRightHandle;
-
-}
-
-
-- (BOOL)canSetDrawingFill {
-
-    // The default implementation of -drawContentsInView: can draw fills.
-    return YES;
+  // Return the number of the handle for the lower-right corner. If the user drags it so that it's no longer in the lower-right, -resizeByMovingHandle:toPoint: will deal with it.
+  return SKTGraphicLowerRightHandle;
 
 }
 
 
-- (BOOL)canSetDrawingStroke {
+- (BOOL) canSetDrawingFill
+{
 
-    // The default implementation of -drawContentsInView: can draw strokes.
-    return YES;
-
-}
-
-
-- (BOOL)canMakeNaturalSize {
-
-    // Only return YES if -makeNaturalSize would actually do something.
-    NSRect bounds = [self bounds];
-    return bounds.size.width!=bounds.size.height;
+  // The default implementation of -drawContentsInView: can draw fills.
+  return YES;
 
 }
 
 
-- (BOOL)isContentsUnderPoint:(NSPoint)point {
+- (BOOL) canSetDrawingStroke
+{
 
-    // Just check against the graphic's bounds.
-    return NSPointInRect(point, [self bounds]);
+  // The default implementation of -drawContentsInView: can draw strokes.
+  return YES;
 
 }
 
 
-- (NSInteger)handleUnderPoint:(NSPoint)point {
-    
-    // Check handles at the corners and on the sides.
-    NSInteger handle = SKTGraphicNoHandle;
-    NSRect bounds = [self bounds];
-    if ([self isHandleAtPoint:NSMakePoint(NSMinX(bounds), NSMinY(bounds)) underPoint:point]) {
-	handle = SKTGraphicUpperLeftHandle;
-    } else if ([self isHandleAtPoint:NSMakePoint(NSMidX(bounds), NSMinY(bounds)) underPoint:point]) {
-	handle = SKTGraphicUpperMiddleHandle;
-    } else if ([self isHandleAtPoint:NSMakePoint(NSMaxX(bounds), NSMinY(bounds)) underPoint:point]) {
-	handle = SKTGraphicUpperRightHandle;
-    } else if ([self isHandleAtPoint:NSMakePoint(NSMinX(bounds), NSMidY(bounds)) underPoint:point]) {
-	handle = SKTGraphicMiddleLeftHandle;
-    } else if ([self isHandleAtPoint:NSMakePoint(NSMaxX(bounds), NSMidY(bounds)) underPoint:point]) {
-	handle = SKTGraphicMiddleRightHandle;
-    } else if ([self isHandleAtPoint:NSMakePoint(NSMinX(bounds), NSMaxY(bounds)) underPoint:point]) {
-	handle = SKTGraphicLowerLeftHandle;
-    } else if ([self isHandleAtPoint:NSMakePoint(NSMidX(bounds), NSMaxY(bounds)) underPoint:point]) {
-	handle = SKTGraphicLowerMiddleHandle;
-    } else if ([self isHandleAtPoint:NSMakePoint(NSMaxX(bounds), NSMaxY(bounds)) underPoint:point]) {
-	handle = SKTGraphicLowerRightHandle;
+- (BOOL) canMakeNaturalSize
+{
+
+  // Only return YES if -makeNaturalSize would actually do something.
+  NSRect bounds = [self bounds];
+  return bounds.size.width != bounds.size.height;
+
+}
+
+
+- (BOOL) isContentsUnderPoint: (NSPoint)point
+{
+
+  // Just check against the graphic's bounds.
+  return NSPointInRect(point, [self bounds]);
+
+}
+
+
+- (NSInteger) handleUnderPoint: (NSPoint)point
+{
+
+  // Check handles at the corners and on the sides.
+  NSInteger handle = SKTGraphicNoHandle;
+  NSRect bounds = [self bounds];
+  if ([self isHandleAtPoint: NSMakePoint(NSMinX(bounds), NSMinY(bounds)) underPoint: point])
+    {
+      handle = SKTGraphicUpperLeftHandle;
     }
-    return handle;
-
-}
-
-
-- (BOOL)isHandleAtPoint:(NSPoint)handlePoint underPoint:(NSPoint)point {
-    
-    // Check a handle-sized rectangle that's centered on the handle point.
-    NSRect handleBounds;
-    handleBounds.origin.x = handlePoint.x - SKTGraphicHandleHalfWidth;
-    handleBounds.origin.y = handlePoint.y - SKTGraphicHandleHalfWidth;
-    handleBounds.size.width = SKTGraphicHandleWidth;
-    handleBounds.size.height = SKTGraphicHandleWidth;
-    return NSPointInRect(point, handleBounds);
-
-}
-
-
-- (NSInteger)resizeByMovingHandle:(NSInteger)handle toPoint:(NSPoint)point {
-
-    // Start with the original bounds.
-    NSRect bounds = [self bounds];
-
-    // Is the user changing the width of the graphic?
-    if (handle==SKTGraphicUpperLeftHandle || handle==SKTGraphicMiddleLeftHandle || handle==SKTGraphicLowerLeftHandle) {
-
-	// Change the left edge of the graphic.
-        bounds.size.width = NSMaxX(bounds) - point.x;
-        bounds.origin.x = point.x;
-
-    } else if (handle==SKTGraphicUpperRightHandle || handle==SKTGraphicMiddleRightHandle || handle==SKTGraphicLowerRightHandle) {
-
-	// Change the right edge of the graphic.
-        bounds.size.width = point.x - bounds.origin.x;
-
+  else if ([self isHandleAtPoint: NSMakePoint(NSMidX(bounds), NSMinY(bounds)) underPoint: point])
+    {
+      handle = SKTGraphicUpperMiddleHandle;
     }
+  else if ([self isHandleAtPoint: NSMakePoint(NSMaxX(bounds), NSMinY(bounds)) underPoint: point])
+    {
+      handle = SKTGraphicUpperRightHandle;
+    }
+  else if ([self isHandleAtPoint: NSMakePoint(NSMinX(bounds), NSMidY(bounds)) underPoint: point])
+    {
+      handle = SKTGraphicMiddleLeftHandle;
+    }
+  else if ([self isHandleAtPoint: NSMakePoint(NSMaxX(bounds), NSMidY(bounds)) underPoint: point])
+    {
+      handle = SKTGraphicMiddleRightHandle;
+    }
+  else if ([self isHandleAtPoint: NSMakePoint(NSMinX(bounds), NSMaxY(bounds)) underPoint: point])
+    {
+      handle = SKTGraphicLowerLeftHandle;
+    }
+  else if ([self isHandleAtPoint: NSMakePoint(NSMidX(bounds), NSMaxY(bounds)) underPoint: point])
+    {
+      handle = SKTGraphicLowerMiddleHandle;
+    }
+  else if ([self isHandleAtPoint: NSMakePoint(NSMaxX(bounds), NSMaxY(bounds)) underPoint: point])
+    {
+      handle = SKTGraphicLowerRightHandle;
+    }
+  return handle;
 
-    // Did the user actually flip the graphic over?
-    if (bounds.size.width<0.0f) {
+}
 
-	// The handle is now playing a different role relative to the graphic.
-	static NSInteger flippings[9];
-	static BOOL flippingsInitialized = NO;
-	if (!flippingsInitialized) {
-	    flippings[SKTGraphicUpperLeftHandle] = SKTGraphicUpperRightHandle;
-	    flippings[SKTGraphicUpperMiddleHandle] = SKTGraphicUpperMiddleHandle;
-	    flippings[SKTGraphicUpperRightHandle] = SKTGraphicUpperLeftHandle;
-	    flippings[SKTGraphicMiddleLeftHandle] = SKTGraphicMiddleRightHandle;
-	    flippings[SKTGraphicMiddleRightHandle] = SKTGraphicMiddleLeftHandle;
-	    flippings[SKTGraphicLowerLeftHandle] = SKTGraphicLowerRightHandle;
-	    flippings[SKTGraphicLowerMiddleHandle] = SKTGraphicLowerMiddleHandle;
-	    flippings[SKTGraphicLowerRightHandle] = SKTGraphicLowerLeftHandle;
-	    flippingsInitialized = YES;
-	}
-        handle = flippings[handle];
 
-	// Make the graphic's width positive again.
-        bounds.size.width = 0.0f - bounds.size.width;
-        bounds.origin.x -= bounds.size.width;
+- (BOOL) isHandleAtPoint: (NSPoint)handlePoint underPoint: (NSPoint)point
+{
 
-	// Tell interested subclass code what just happened.
-        [self flipHorizontally];
+  // Check a handle-sized rectangle that's centered on the handle point.
+  NSRect handleBounds;
+  handleBounds.origin.x = handlePoint.x - SKTGraphicHandleHalfWidth;
+  handleBounds.origin.y = handlePoint.y - SKTGraphicHandleHalfWidth;
+  handleBounds.size.width = SKTGraphicHandleWidth;
+  handleBounds.size.height = SKTGraphicHandleWidth;
+  return NSPointInRect(point, handleBounds);
+
+}
+
+
+- (NSInteger) resizeByMovingHandle: (NSInteger)handle toPoint: (NSPoint)point
+{
+
+  // Start with the original bounds.
+  NSRect bounds = [self bounds];
+
+  // Is the user changing the width of the graphic?
+  if (handle == SKTGraphicUpperLeftHandle || handle == SKTGraphicMiddleLeftHandle
+      || handle == SKTGraphicLowerLeftHandle)
+    {
+
+      // Change the left edge of the graphic.
+      bounds.size.width = NSMaxX(bounds) - point.x;
+      bounds.origin.x = point.x;
 
     }
-    
-    // Is the user changing the height of the graphic?
-    if (handle==SKTGraphicUpperLeftHandle || handle==SKTGraphicUpperMiddleHandle || handle==SKTGraphicUpperRightHandle) {
+  else if (handle == SKTGraphicUpperRightHandle || handle == SKTGraphicMiddleRightHandle
+           || handle == SKTGraphicLowerRightHandle)
+    {
 
-	// Change the top edge of the graphic.
-        bounds.size.height = NSMaxY(bounds) - point.y;
-        bounds.origin.y = point.y;
-
-    } else if (handle==SKTGraphicLowerLeftHandle || handle==SKTGraphicLowerMiddleHandle || handle==SKTGraphicLowerRightHandle) {
-
-	// Change the bottom edge of the graphic.
-	bounds.size.height = point.y - bounds.origin.y;
+      // Change the right edge of the graphic.
+      bounds.size.width = point.x - bounds.origin.x;
 
     }
 
-    // Did the user actually flip the graphic upside down?
-    if (bounds.size.height<0.0f) {
+  // Did the user actually flip the graphic over?
+  if (bounds.size.width < 0.0f)
+    {
 
-	// The handle is now playing a different role relative to the graphic.
-	static NSInteger flippings[9];
-	static BOOL flippingsInitialized = NO;
-	if (!flippingsInitialized) {
-	    flippings[SKTGraphicUpperLeftHandle] = SKTGraphicLowerLeftHandle;
-	    flippings[SKTGraphicUpperMiddleHandle] = SKTGraphicLowerMiddleHandle;
-	    flippings[SKTGraphicUpperRightHandle] = SKTGraphicLowerRightHandle;
-	    flippings[SKTGraphicMiddleLeftHandle] = SKTGraphicMiddleLeftHandle;
-	    flippings[SKTGraphicMiddleRightHandle] = SKTGraphicMiddleRightHandle;
-	    flippings[SKTGraphicLowerLeftHandle] = SKTGraphicUpperLeftHandle;
-	    flippings[SKTGraphicLowerMiddleHandle] = SKTGraphicUpperMiddleHandle;
-	    flippings[SKTGraphicLowerRightHandle] = SKTGraphicUpperRightHandle;
-	    flippingsInitialized = YES;
-	}
-        handle = flippings[handle];
-	
-	// Make the graphic's height positive again.
-        bounds.size.height = 0.0f - bounds.size.height;
-        bounds.origin.y -= bounds.size.height;
+      // The handle is now playing a different role relative to the graphic.
+      static NSInteger flippings[9];
+      static BOOL flippingsInitialized = NO;
+      if (!flippingsInitialized)
+        {
+          flippings[SKTGraphicUpperLeftHandle] = SKTGraphicUpperRightHandle;
+          flippings[SKTGraphicUpperMiddleHandle] = SKTGraphicUpperMiddleHandle;
+          flippings[SKTGraphicUpperRightHandle] = SKTGraphicUpperLeftHandle;
+          flippings[SKTGraphicMiddleLeftHandle] = SKTGraphicMiddleRightHandle;
+          flippings[SKTGraphicMiddleRightHandle] = SKTGraphicMiddleLeftHandle;
+          flippings[SKTGraphicLowerLeftHandle] = SKTGraphicLowerRightHandle;
+          flippings[SKTGraphicLowerMiddleHandle] = SKTGraphicLowerMiddleHandle;
+          flippings[SKTGraphicLowerRightHandle] = SKTGraphicLowerLeftHandle;
+          flippingsInitialized = YES;
+        }
+      handle = flippings[handle];
 
-	// Tell interested subclass code what just happened.
-        [self flipVertically];
+      // Make the graphic's width positive again.
+      bounds.size.width = 0.0f - bounds.size.width;
+      bounds.origin.x -= bounds.size.width;
+
+      // Tell interested subclass code what just happened.
+      [self flipHorizontally];
 
     }
 
-    // Done.
-    [self setBounds:bounds];
-    return handle;
+  // Is the user changing the height of the graphic?
+  if (handle == SKTGraphicUpperLeftHandle || handle == SKTGraphicUpperMiddleHandle
+      || handle == SKTGraphicUpperRightHandle)
+    {
 
-}
+      // Change the top edge of the graphic.
+      bounds.size.height = NSMaxY(bounds) - point.y;
+      bounds.origin.y = point.y;
 
-
-- (void)flipHorizontally {
-    
-    // Live to be overridden.
-
-}
-
-
-- (void)flipVertically {
-    
-    // Live to be overridden.
-
-}
-
-
-- (void)makeNaturalSize {
-
-    // Just make the graphic square.
-    NSRect bounds = [self bounds];
-    if (bounds.size.width<bounds.size.height) {
-        bounds.size.height = bounds.size.width;
-        [self setBounds:bounds];
-    } else if (bounds.size.width>bounds.size.height) {
-        bounds.size.width = bounds.size.height;
-        [self setBounds:bounds];
     }
-    
+  else if (handle == SKTGraphicLowerLeftHandle || handle == SKTGraphicLowerMiddleHandle
+           || handle == SKTGraphicLowerRightHandle)
+    {
+
+      // Change the bottom edge of the graphic.
+      bounds.size.height = point.y - bounds.origin.y;
+
+    }
+
+  // Did the user actually flip the graphic upside down?
+  if (bounds.size.height < 0.0f)
+    {
+
+      // The handle is now playing a different role relative to the graphic.
+      static NSInteger flippings[9];
+      static BOOL flippingsInitialized = NO;
+      if (!flippingsInitialized)
+        {
+          flippings[SKTGraphicUpperLeftHandle] = SKTGraphicLowerLeftHandle;
+          flippings[SKTGraphicUpperMiddleHandle] = SKTGraphicLowerMiddleHandle;
+          flippings[SKTGraphicUpperRightHandle] = SKTGraphicLowerRightHandle;
+          flippings[SKTGraphicMiddleLeftHandle] = SKTGraphicMiddleLeftHandle;
+          flippings[SKTGraphicMiddleRightHandle] = SKTGraphicMiddleRightHandle;
+          flippings[SKTGraphicLowerLeftHandle] = SKTGraphicUpperLeftHandle;
+          flippings[SKTGraphicLowerMiddleHandle] = SKTGraphicUpperMiddleHandle;
+          flippings[SKTGraphicLowerRightHandle] = SKTGraphicUpperRightHandle;
+          flippingsInitialized = YES;
+        }
+      handle = flippings[handle];
+
+      // Make the graphic's height positive again.
+      bounds.size.height = 0.0f - bounds.size.height;
+      bounds.origin.y -= bounds.size.height;
+
+      // Tell interested subclass code what just happened.
+      [self flipVertically];
+
+    }
+
+  // Done.
+  [self setBounds: bounds];
+  return handle;
+
 }
 
 
-- (void)setBounds:(NSRect)bounds {
+- (void) flipHorizontally
+{
 
-    // Simple.
-    _bounds = bounds;
+  // Live to be overridden.
 
 }
 
 
-- (void)setFillColor:(NSColor *)color {
-    if ([self canSetDrawingFill] && [self isDrawingFill]) {
+- (void) flipVertically
+{
+
+  // Live to be overridden.
+
+}
+
+
+- (void) makeNaturalSize
+{
+
+  // Just make the graphic square.
+  NSRect bounds = [self bounds];
+  if (bounds.size.width < bounds.size.height)
+    {
+      bounds.size.height = bounds.size.width;
+      [self setBounds: bounds];
+    }
+  else if (bounds.size.width > bounds.size.height)
+    {
+      bounds.size.width = bounds.size.height;
+      [self setBounds: bounds];
+    }
+
+}
+
+
+- (void) setBounds: (NSRect)bounds
+{
+
+  // Simple.
+  _bounds = bounds;
+
+}
+
+
+- (void) setFillColor: (NSColor *)color
+{
+  if ([self canSetDrawingFill] && [self isDrawingFill])
+    {
       ASSIGN(_fillColor, color);
     }
 }
 
-- (void)setStrokeColor:(NSColor *)color {
-    if ([self canSetDrawingStroke] && [self isDrawingStroke]) {
+- (void) setStrokeColor: (NSColor *)color
+{
+  if ([self canSetDrawingStroke] && [self isDrawingStroke])
+    {
       ASSIGN(_strokeColor, color);
     }
 }
 
-- (NSView *)newEditingViewWithSuperviewBounds:(NSRect)superviewBounds {
-    
-    // Live to be overridden.
-    return nil;
+- (NSView *) newEditingViewWithSuperviewBounds: (NSRect)superviewBounds
+{
+
+  // Live to be overridden.
+  return nil;
 
 }
 
 
-- (void)finalizeEditingView:(NSView *)editingView {
-    
-    // Live to be overridden.
-    
+- (void) finalizeEditingView: (NSView *)editingView
+{
+
+  // Live to be overridden.
+
 }
 
 
 #pragma mark *** Undo ***
 
 
-- (NSSet *)keysForValuesToObserveForUndo {
+- (NSSet *) keysForValuesToObserveForUndo
+{
 
-    // Of the properties managed by SKTGraphic, "drawingingBounds," "drawingContents," "canSetDrawingFill," and "canSetDrawingStroke" aren't anything that the user changes, so changes of their values aren't registered undo operations. "xPosition," "yPosition," "width," and "height" are all derived from "bounds," so we don't need to register those either. Changes of any other property are undoable.
-    return [NSSet setWithObjects:SKTGraphicIsDrawingFillKey, SKTGraphicFillColorKey, SKTGraphicIsDrawingStrokeKey, SKTGraphicStrokeColorKey, SKTGraphicStrokeWidthKey, SKTGraphicBoundsKey, nil];
+  // Of the properties managed by SKTGraphic, "drawingingBounds," "drawingContents," "canSetDrawingFill," and "canSetDrawingStroke" aren't anything that the user changes, so changes of their values aren't registered undo operations. "xPosition," "yPosition," "width," and "height" are all derived from "bounds," so we don't need to register those either. Changes of any other property are undoable.
+  return [NSSet setWithObjects: SKTGraphicIsDrawingFillKey, SKTGraphicFillColorKey,
+                SKTGraphicIsDrawingStrokeKey, SKTGraphicStrokeColorKey, SKTGraphicStrokeWidthKey,
+                SKTGraphicBoundsKey, nil];
 
 }
 
 
-+ (NSString *)presentablePropertyNameForKey:(NSString *)key {
-    
-    // Pretty simple. Don't be surprised if you never see "Bounds" appear in an undo action name in Sketch. SKTGraphicView invokes -[NSUndoManager setActionName:] for things like moving, resizing, and aligning, thereby overwriting whatever SKTDocument sets with something more specific.
-    static NSDictionary *presentablePropertyNamesByKey = nil;
-    if (!presentablePropertyNamesByKey) {
-	presentablePropertyNamesByKey = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
-	    NSLocalizedStringFromTable(@"Filling", @"UndoStrings", @"Action name part for SKTGraphicIsDrawingFillKey."), SKTGraphicIsDrawingFillKey,
-	    NSLocalizedStringFromTable(@"Fill Color", @"UndoStrings",@"Action name part for SKTGraphicFillColorKey."), SKTGraphicFillColorKey,
-	    NSLocalizedStringFromTable(@"Stroking", @"UndoStrings", @"Action name part for SKTGraphicIsDrawingStrokeKey."), SKTGraphicIsDrawingStrokeKey,
-	    NSLocalizedStringFromTable(@"Stroke Color", @"UndoStrings", @"Action name part for SKTGraphicStrokeColorKey."), SKTGraphicStrokeColorKey,
-	    NSLocalizedStringFromTable(@"Stroke Width", @"UndoStrings", @"Action name part for SKTGraphicStrokeWidthKey."), SKTGraphicStrokeWidthKey,
-	    NSLocalizedStringFromTable(@"Bounds", @"UndoStrings", @"Action name part for SKTGraphicBoundsKey."), SKTGraphicBoundsKey,
-	    nil];
++ (NSString *) presentablePropertyNameForKey: (NSString *)key
+{
+
+  // Pretty simple. Don't be surprised if you never see "Bounds" appear in an undo action name in Sketch. SKTGraphicView invokes -[NSUndoManager setActionName:] for things like moving, resizing, and aligning, thereby overwriting whatever SKTDocument sets with something more specific.
+  static NSDictionary *presentablePropertyNamesByKey = nil;
+  if (!presentablePropertyNamesByKey)
+    {
+      presentablePropertyNamesByKey = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
+                                                                   NSLocalizedStringFromTable(@"Filling", @"UndoStrings",
+                                                                  @"Action name part for SKTGraphicIsDrawingFillKey."), SKTGraphicIsDrawingFillKey,
+                                                                   NSLocalizedStringFromTable(@"Fill Color", @"UndoStrings",
+                                                                  @"Action name part for SKTGraphicFillColorKey."), SKTGraphicFillColorKey,
+                                                                   NSLocalizedStringFromTable(@"Stroking", @"UndoStrings",
+                                                                  @"Action name part for SKTGraphicIsDrawingStrokeKey."), SKTGraphicIsDrawingStrokeKey,
+                                                                   NSLocalizedStringFromTable(@"Stroke Color", @"UndoStrings",
+                                                                  @"Action name part for SKTGraphicStrokeColorKey."), SKTGraphicStrokeColorKey,
+                                                                   NSLocalizedStringFromTable(@"Stroke Width", @"UndoStrings",
+                                                                  @"Action name part for SKTGraphicStrokeWidthKey."), SKTGraphicStrokeWidthKey,
+                                                                   NSLocalizedStringFromTable(@"Bounds", @"UndoStrings", @"Action name part for SKTGraphicBoundsKey."),
+                                                                   SKTGraphicBoundsKey,
+                                                                   nil];
     }
-    return [presentablePropertyNamesByKey objectForKey:key];
+  return [presentablePropertyNamesByKey objectForKey: key];
 
 }
 
@@ -787,10 +933,11 @@ static CGFloat SKTGraphicHandleHalfWidth = 6.0f / 2.0f;
 
 
 // An override of the NSObject method.
-- (NSString *)description {
+- (NSString *) description
+{
 
-    // Make 'po aGraphic' do something useful in gdb.
-    return [[self properties] description];
+  // Make 'po aGraphic' do something useful in gdb.
+  return [[self properties] description];
 
 }
 

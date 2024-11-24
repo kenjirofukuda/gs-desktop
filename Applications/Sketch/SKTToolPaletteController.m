@@ -9,70 +9,89 @@
 #import "SKTRectangle.h"
 #import "SKTText.h"
 
-enum {
-    SKTArrowToolRow = 0,
-    SKTRectToolRow,
-    SKTCircleToolRow,
-    SKTLineToolRow,
-    SKTTextToolRow,
+enum
+{
+  SKTArrowToolRow = 0,
+  SKTRectToolRow,
+  SKTCircleToolRow,
+  SKTLineToolRow,
+  SKTTextToolRow,
 };
 
 NSString *SKTSelectedToolDidChangeNotification = @"SKTSelectedToolDidChange";
 
 @implementation SKTToolPaletteController
 
-+ (id)sharedToolPaletteController {
-    static SKTToolPaletteController *sharedToolPaletteController = nil;
++ (id) sharedToolPaletteController
+{
+  static SKTToolPaletteController *sharedToolPaletteController = nil;
 
-    if (!sharedToolPaletteController) {
-        sharedToolPaletteController = [[SKTToolPaletteController allocWithZone:NULL] init];
+  if (!sharedToolPaletteController)
+    {
+      sharedToolPaletteController = [[SKTToolPaletteController allocWithZone: NULL] init];
     }
 
-    return sharedToolPaletteController;
+  return sharedToolPaletteController;
 }
 
-- (id)init {
-    self = [self initWithWindowNibName:@"ToolPalette"];
-    if (self) {
-        [self setWindowFrameAutosaveName:@"ToolPalette"];
+- (id) init
+{
+  self = [self initWithWindowNibName: @"ToolPalette"];
+  if (self)
+    {
+      [self setWindowFrameAutosaveName: @"ToolPalette"];
     }
-    return self;
+  return self;
 }
 
-- (void)windowDidLoad {
-    NSArray *cells = [toolButtons cells];
-    NSUInteger i, c = [cells count];
-    
-    [super windowDidLoad];
+- (void) windowDidLoad
+{
+  NSArray *cells = [toolButtons cells];
+  NSUInteger i, c = [cells count];
 
-    for (i=0; i<c; i++) {
-        [[cells objectAtIndex:i] setRefusesFirstResponder:YES];
+  [super windowDidLoad];
+
+  for (i = 0; i < c; i++)
+    {
+      [[cells objectAtIndex: i] setRefusesFirstResponder: YES];
     }
-    [(NSPanel *)[self window] setBecomesKeyOnlyIfNeeded:YES];
+  [(NSPanel *)[self window] setBecomesKeyOnlyIfNeeded: YES];
 }
 
-- (IBAction)selectToolAction:(id)sender {
-    [[NSNotificationCenter defaultCenter] postNotificationName:SKTSelectedToolDidChangeNotification object:self];
+- (IBAction) selectToolAction: (id)sender
+{
+  [[NSNotificationCenter defaultCenter] postNotificationName: SKTSelectedToolDidChangeNotification
+                                        object: self];
 }
 
-- (Class)currentGraphicClass {
-    NSInteger row = [toolButtons selectedRow];
-    Class theClass = nil;
-    if (row == SKTRectToolRow) {
-        theClass = [SKTRectangle class];
-    } else if (row == SKTCircleToolRow) {
-        theClass = [SKTCircle class];
-    } else if (row == SKTLineToolRow) {
-        theClass = [SKTLine class];
-    } else if (row == SKTTextToolRow) {
-        theClass = [SKTText class];
+- (Class) currentGraphicClass
+{
+  NSInteger row = [toolButtons selectedRow];
+  Class theClass = nil;
+  if (row == SKTRectToolRow)
+    {
+      theClass = [SKTRectangle class];
     }
-    return theClass;
+  else if (row == SKTCircleToolRow)
+    {
+      theClass = [SKTCircle class];
+    }
+  else if (row == SKTLineToolRow)
+    {
+      theClass = [SKTLine class];
+    }
+  else if (row == SKTTextToolRow)
+    {
+      theClass = [SKTText class];
+    }
+  return theClass;
 }
 
-- (void)selectArrowTool {
-    [toolButtons selectCellAtRow:SKTArrowToolRow column:0];
-    [[NSNotificationCenter defaultCenter] postNotificationName:SKTSelectedToolDidChangeNotification object:self];
+- (void) selectArrowTool
+{
+  [toolButtons selectCellAtRow: SKTArrowToolRow column: 0];
+  [[NSNotificationCenter defaultCenter] postNotificationName: SKTSelectedToolDidChangeNotification
+                                        object: self];
 }
 
 @end

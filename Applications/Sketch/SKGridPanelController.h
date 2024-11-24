@@ -5,8 +5,9 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface SKGridPanelController : NSWindowController {
+@interface SKGridPanelController : NSWindowController
+{
 }
 
-+ (id)sharedGridPanelController;
++ (id) sharedGridPanelController;
 @end
